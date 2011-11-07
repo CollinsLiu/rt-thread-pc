@@ -6,7 +6,7 @@ OBJS := $(addsuffix .o, $(basename $(SRCS)))
 
 OBJS += $(addsuffix .o, $(basename $(ASMSRCS)))
 
-CFLAGS := -mtune=i386 -I$(TOP)/include -I. -I$(BOARDDIR) -I$(CPUDIR)/include
+CFLAGS := -I$(TOP)/include -I. -I$(BOARDDIR) -I$(CPUDIR)/include $(CFLAGS_COMMON)
 
 .S.o:
 	$(CC) -c $(CFLAGS) $(ASMSRCS)

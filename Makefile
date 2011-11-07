@@ -6,8 +6,11 @@ CC := $(CROSS)gcc
 AR := $(CROSS)ar
 LD := $(CROSS)ld
 OBJDUMP := $(CROSS)objdump
+NM := $(CROSS)nm
 
-CFLAGS := -nostdlib -fno-stack-protector
+CFLAGS :=
+CFLAGS_COMMON := -fno-stack-protector -mtune=i386 -fomit-frame-pointer
+LDFLAGS := -nostdlib
 
 ARCH ?= ia32
 CPU ?= ia32
@@ -19,12 +22,12 @@ CPUDIR := $(TOP)/libcpu/$(CPU)
 BOARDDIR := $(TOP)/bsp/$(BOARD)
 KERNELDIR := $(TOP)/src
 
-export CC AR LD TOP COMPONENTDIR CPUDIR BOARDDIR KERNELDIR
+export CC AR LD TOP COMPONENTDIR CPUDIR BOARDDIR KERNELDIR CFLAGS_COMMON
 
 LIBS := libbsp.a libcpu.a libkernel.a libfinsh.a
 
 all: $(LIBS)
-	$(CC) $(CFLAGS) $(CPUDIR)/start.o $(BOARDDIR)/libbsp.a $(FINSHDIR)/libfinsh.a \
+	$(CC) $(LDFLAGS) $(CPUDIR)/start.o $(BOARDDIR)/libbsp.a $(FINSHDIR)/libfinsh.a \
 			$(KERNELDIR)/libkernel.a $(CPUDIR)/libcpu.a -o rt-thread.elf -T $(BOARDDIR)/qemu_ram.lds
 
 dummy:
@@ -46,9 +49,13 @@ clean:
 	make -C $(BOARDDIR) clean
 	make -C $(CPUDIR) clean
 	make -C $(KERNELDIR) clean
-	rm rt-thread.elf
+	rm rt-thread.elf *.log *.nm
+
 dump:
 	$(OBJDUMP) -d rt-thread.elf > rt-thread.elf.log
+
+nm:
+	$(NM) rt-thread.elf > rt-thread.elf.log.nm
 
 qemu: rt-thread.elf
 	qemu -kernel $<
